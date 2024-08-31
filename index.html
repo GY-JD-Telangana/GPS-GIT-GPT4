@@ -1,0 +1,284 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4WD Survey</title>
+    <style>
+        body {
+            background-color: grey;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[type="submit"] {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #218838;
+        }
+
+        .radio-group {
+            margin-bottom: 10px;
+        }
+
+        .radio-group label {
+            display: inline-block;
+            margin-right: 15px; /* Space between radio buttons */
+        }
+    </style>
+    <script>
+        // Function to detect if the device is mobile
+        function isMobileDevice() {
+            return /Mobi|Android/i.test(navigator.userAgent);
+        }
+
+        // Function to get GPS location
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        // Function to display GPS coordinates in form fields
+        function showPosition(position) {
+            document.getElementById("latitude").value = position.coords.latitude;
+            document.getElementById("longitude").value = position.coords.longitude;
+        }
+
+        // Function to handle geolocation errors
+        function showError(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    alert("User denied the request for Geolocation.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Location information is unavailable.");
+                    break;
+                case error.TIMEOUT:
+                    alert("The request to get user location timed out.");
+                    break;
+                case error.UNKNOWN_ERROR:
+                    alert("An unknown error occurred.");
+                    break;
+            }
+        }
+
+        // Function to submit the form data to Google Sheets
+        function submitForm() {
+            const data = {
+                name: document.getElementById("name").value,
+                locationInfo: document.getElementById("location-info").value,
+                question1: document.querySelector('input[name="question1"]:checked').value,
+                question2: document.querySelector('input[name="question2"]:checked').value,
+                dropdown1: document.getElementById("dropdown1").value,
+                dropdown2: document.getElementById("dropdown2").value,
+                latitude: document.getElementById("latitude").value,
+                longitude: document.getElementById("longitude").value
+            };
+
+            const url = "https://script.google.com/macros/s/AKfycbwi0Iv0PYu4IPxcvczzcfAdabt-ZMQZ8u1_hnWVa0_b4R4EdU-OSjxFTFoaRG1kV7p6/exec"; // Replace with your Google Apps Script URL
+
+            fetch(url, {
+                method: "POST",
+                mode: "no-cors", // 'no-cors' allows cross-origin requests without CORS headers
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            }).then(response => {
+                alert("Form submitted successfully!");
+            }).catch(error => {
+                console.error("Error submitting form:", error);
+            });
+        }
+
+        // Call getLocation() on page load
+        window.onload = getLocation;
+    </script>
+</head>
+<body>
+
+<img src="https://logos-world.net/imageup/John_Deere/John_Deere-Logo-PNG3.png" alt="Leaping deer logo" width="120" height="75" style="display: block; margin: 0 auto;">
+
+
+<b><h2 style="text-align:center;">Van campain and 4WD Survey</h2></b>
+
+<em><h4 style="text-align:center;color:White;"><mark>Attention:</mark>Fill only when you are at the village</h4></em>
+
+    <form onsubmit="event.preventDefault(); submitForm();">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="location-info">Location Information:</label>
+        <input type="text" id="location-info" name="location-info" required>
+
+        <label><b>Is there JD Tractor in this Village?:</b></label>
+        <div class="radio-group">
+            <input type="radio" id="q1a" name="question1" value="Yes" required>
+            <label for="q1a">Yes</label>
+            <input type="radio" id="q1b" name="question1" value="No">
+            <label for="q1b">No</label>
+        </div>
+
+        <label><b>Is there JD MFWD 4WD tractor in this Village?:</b></label>
+        <div class="radio-group">
+            <input type="radio" id="q2a" name="question2" value="Yes" required>
+            <label for="q2a">Yes</label>
+            <input type="radio" id="q2b" name="question2" value="No">
+            <label for="q2b">No</label>
+        </div>
+
+        <label for="dropdown1">Dropdown 1:</label>
+        <select id="dropdown1" name="dropdown1" required>
+            <option value="">Select</option>
+            <option value="Choice 1">Choice 1</option>
+            <option value="Choice 2">Choice 2</option>
+        </select>
+
+        <label for="dropdown2">Approx Total village population:</label>
+        <select id="dropdown2" name="dropdown2" required>
+            <option value="">Select</option>
+            <option value="0-10 Tractors">0-10 Tractors</option>
+            <option value="10-25 Tractors">10-25 Tractors</option>
+            <option value="25-50 Tractors">25-50 Tractors</option>
+            <option value="50+ Tractors">50+ Tractors</option>
+            
+        </select>
+
+        <label for="latitude">Latitude:</label>
+        <input type="text" id="latitude" name="latitude" readonly>
+
+        <label for="longitude">Longitude:</label>
+        <input type="text" id="longitude" name="longitude" readonly>
+
+        <input type="submit" id="submit-button" value="Submit">
+    </form>
+   
+   
+   
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embedded Google Map</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        #map {
+            height: 400px; /* Set the height of the map */
+            width: 100%; /* Full width */
+            margin: auto; /* Center the map */
+        }
+    </style>
+</head>
+<body>
+    <h1>Your Current Location:</h1>
+    <div id="map"></div>
+
+    <script>
+        let map;
+        let marker;
+
+        function initMap() {
+            // Default map location (if geolocation fails)
+            const defaultLocation = { lat: -34.397, lng: 150.644 };
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 15,
+                center: defaultLocation,
+            });
+            marker = new google.maps.Marker({
+                position: defaultLocation,
+                map: map,
+            });
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function showPosition(position) {
+            const userLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+            };
+
+            // Update map center and marker position
+            map.setCenter(userLocation);
+            marker.setPosition(userLocation);
+        }
+
+        function showError(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    alert("User denied the request for Geolocation.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Location information is unavailable.");
+                    break;
+                case error.TIMEOUT:
+                    alert("The request to get user location timed out.");
+                    break;
+                case error.UNKNOWN_ERROR:
+                    alert("An unknown error occurred.");
+                    break;
+            }
+        }
+
+        // Load the Google Maps script with your API key
+        const script = document.createElement("script");
+        script.src = "https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap";
+        script.async = true;
+        document.head.appendChild(script);
+
+        // Get location on page load
+        window.onload = getLocation;
+    </script>
+</body>
+</html>
