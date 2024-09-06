@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,7 +46,7 @@
         }
 
         input[type="submit"]:hover {
-            background-color: #218838;
+            background-color: #FFaa00;
         }
 
         .radio-group {
@@ -56,15 +55,17 @@
 
         .radio-group label {
             display: inline-block;
-            margin-right: 15px; /* Space between radio buttons */
-        }
-    </style>
-    <script>
-        // Function to detect if the device is mobile
-        function isMobileDevice() {
-            return /Mobi|Android/i.test(navigator.userAgent);
+            margin-right: 15px;
         }
 
+        input[type="submit"]:disabled {
+            background-color: grey;
+            cursor: not-allowed;
+        }
+    </style>
+ 
+
+    <script>
         // Function to get GPS location
         function getLocation() {
             if (navigator.geolocation) {
@@ -78,11 +79,14 @@
         function showPosition(position) {
             document.getElementById("latitude").value = position.coords.latitude;
             document.getElementById("longitude").value = position.coords.longitude;
+
+            // Enable the submit button after getting the location
+            document.getElementById("submit-button").disabled = false;
         }
 
         // Function to handle geolocation errors
         function showError(error) {
-            switch(error.code) {
+            switch (error.code) {
                 case error.PERMISSION_DENIED:
                     alert("User denied the request for Geolocation.");
                     break;
@@ -96,6 +100,24 @@
                     alert("An unknown error occurred.");
                     break;
             }
+
+            // Keep the submit button disabled if there is an error
+            document.getElementById("submit-button").disabled = true;
+        }
+
+        // Function to detect device type
+        function getDeviceType() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+            if (/android/i.test(userAgent)) {
+                return 'Android';
+            }
+
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                return 'iOS';
+            }
+
+            return 'Unknown'; // Default if neither is detected
         }
 
         // Function to submit the form data to Google Sheets
@@ -105,13 +127,20 @@
                 locationInfo: document.getElementById("location-info").value,
                 question1: document.querySelector('input[name="question1"]:checked').value,
                 question2: document.querySelector('input[name="question2"]:checked').value,
-                dropdown1: document.getElementById("dropdown1").value,
+                question3: document.querySelector('input[name="question3"]:checked').value,
                 dropdown2: document.getElementById("dropdown2").value,
+                category: document.getElementById("category").value,
+                subcategory: document.getElementById("subcategory").value,
                 latitude: document.getElementById("latitude").value,
-                longitude: document.getElementById("longitude").value
+                longitude: document.getElementById("longitude").value,
+                deviceType: getDeviceType() // Capture device type
             };
 
-            const url = "https://script.google.com/macros/s/AKfycbwi0Iv0PYu4IPxcvczzcfAdabt-ZMQZ8u1_hnWVa0_b4R4EdU-OSjxFTFoaRG1kV7p6/exec"; // Replace with your Google Apps Script URL
+            const url = "https://script.google.com/macros/s/AKfycbwBcHNh_VfM9WI_ClC-MK5xKdcwkQFIq4J50wyNh_FzJdExHwLNOZZIOGULxPbcje6D/exec"; // Replace with your Google Apps Script URL
+
+            const submitButton = document.getElementById("submit-button");
+            submitButton.textContent = "Pl wait, uploading data"; // Change button text
+            submitButton.disabled = true; // Disable button
 
             fetch(url, {
                 method: "POST",
@@ -122,30 +151,39 @@
                 body: JSON.stringify(data)
             }).then(response => {
                 alert("Form submitted successfully!");
+                submitButton.textContent = "Submit"; // Reset button text
+                submitButton.disabled = false; // Re-enable button
             }).catch(error => {
                 console.error("Error submitting form:", error);
+                submitButton.textContent = "Submit"; // Reset button text on error
+                submitButton.disabled = false; // Re-enable button
             });
         }
 
         // Call getLocation() on page load
-        window.onload = getLocation;
+        window.onload = function() {
+            getLocation();
+            // Disable the submit button initially
+            document.getElementById("submit-button").disabled = true;
+        }
     </script>
 </head>
 <body>
 
-<img src="https://logos-world.net/imageup/John_Deere/John_Deere-Logo-PNG3.png" alt="Leaping deer logo" width="120" height="75" style="display: block; margin: 0 auto;">
+    <img src="https://logos-world.net/imageup/John_Deere/John_Deere-Logo-PNG3.png" alt="Leaping deer logo" width="120" height="75" style="display: block; margin: 0 auto;">
 
+    <b><h2 style="text-align:center;">Van campaign and 4WD Survey</h2></b>
 
-<b><h2 style="text-align:center;">Van campain and 4WD Survey</h2></b>
-
-<em><h4 style="text-align:center;color:White;"><mark>Attention:</mark>Fill only when you are at the village</h4></em>
+    <em><h4 style="text-align:center;color:White;"><mark>Attention:</mark> Fill only when you are at the village</h4></em>
+    
+    <p style="text-align:center;color:yellow;">మీరు <b>లొకేషన్</b> ఆన్ చెయ్యక పోయిన (లేదా) లొకేషన్ పర్మిషన్ ఇవ్వక పోయిన "Submit" బటన్ ఆన్ అవ్వదు.</p>
+    <div><p style="text-align:center;color:white;">లొకేషన్ కి ఎలా పర్మిషన్ ఇవ్వాలో పేజీ కింద ఉన్న వీడియో లో చుడండి </div></p>
 
     <form onsubmit="event.preventDefault(); submitForm();">
-        <label for="name">Name:</label>
+        <label for="name">Your Name:</label>
+        <input type="text" id="name" name ```html
+        <label for="name">Your Name:</label>
         <input type="text" id="name" name="name" required>
-
-        <label for="location-info">Location Information:</label>
-        <input type="text" id="location-info" name="location-info" required>
 
         <label><b>Is there JD Tractor in this Village?:</b></label>
         <div class="radio-group">
@@ -163,12 +201,33 @@
             <label for="q2b">No</label>
         </div>
 
-        <label for="dropdown1">Dropdown 1:</label>
-        <select id="dropdown1" name="dropdown1" required>
-            <option value="">Select</option>
-            <option value="Choice 1">Choice 1</option>
-            <option value="Choice 2">Choice 2</option>
+        <label><b>Village Category</b></label>
+        <div class="radio-group">
+            <input type="radio" id="q3a" name="question3" value="Gram Panchayati" required>
+            <label for="q3a">Gram Panchayati</label>
+            <input type="radio" id="q3b" name="question3" value="Tanda">
+            <label for="q3b">Tanda</label>
+        </div>
+
+        <label for="category">Select District:</label>
+        <select id="category" name="category" onchange="updateSubcategories()">
+            <option value="">Click to select</option>
+            <option value="Adilabad">Adilabad</option>
+            <option value="Bhadradri Kothagudem">Bhadradri Kothagudem</option>
+            <option value="Hyderabad">Hyderabad</option>
         </select>
+
+        <div class="question-box">
+            <label for="subcategory">Select Mandal:</label>
+            <select id="subcategory" name="subcategory">
+                <option value="">Click to Select</option>
+            </select>
+        </div>
+
+        <label for="location-info">Write name of this village:</label>
+        <div class="input-box">
+            <input type="text" id="location-info" name="location-info" required>
+        </div>
 
         <label for="dropdown2">Approx Total village population:</label>
         <select id="dropdown2" name="dropdown2" required>
@@ -177,7 +236,6 @@
             <option value="10-25 Tractors">10-25 Tractors</option>
             <option value="25-50 Tractors">25-50 Tractors</option>
             <option value="50+ Tractors">50+ Tractors</option>
-            
         </select>
 
         <label for="latitude">Latitude:</label>
@@ -188,97 +246,39 @@
 
         <input type="submit" id="submit-button" value="Submit">
     </form>
-   
-   
-   
-</body>
-</html>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Embedded Google Map</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        
-        #map {
-            height: 400px; /* Set the height of the map */
-            width: 100%; /* Full width */
-            margin: auto; /* Center the map */
-        }
-    </style>
-</head>
-<body>
-    <h1>Your Current Location:</h1>
-    <div id="map"></div>
+    <div> <p> 
+    </p></div>
+
+    <img src="https://duet-cdn.vox-cdn.com/thumbor/0x0:1080x1080/1200x1200/filters:focal(540x540:541x541):no_upscale():format(webp)/cdn.vox-cdn.com/uploads/chorus_asset/file/22728661/image.gif" width="250" height="400" style="display: block; margin: 0 auto;">
 
     <script>
-        let map;
-        let marker;
+        // Function to populate the second dropdown based on the selection in the first dropdown
+        function updateSubcategories() {
+            const categorySelect = document.getElementById("category");
+            const subcategorySelect = document.getElementById("subcategory");
+            const selectedCategory = categorySelect.value;
 
-        function initMap() {
-            // Default map location (if geolocation fails)
-            const defaultLocation = { lat: -34.397, lng: 150.644 };
-            map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 15,
-                center: defaultLocation,
-            });
-            marker = new google.maps.Marker({
-                position: defaultLocation,
-                map: map,
-            });
-        }
+            // Clear previous options in the subcategory dropdown
+            subcategorySelect.innerHTML = "";
 
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError);
-            } else {
-                alert("Geolocation is not supported by this browser.");
-            }
-        }
-
-        function showPosition(position) {
-            const userLocation = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
+            // Define subcategories for each category
+            const subcategories = {
+                "Adilabad": ["Adilabad", "Bazarhathnoor", "Bela", "Bheempur", "Boath", "Gudihathnoor", "Ichoda", "Inderavelly", "Jainad", "Mavala", "Narnoor", "Neradigonda", "Talamadugu", "Tamsi", "Utnoor"],
+                "Bhadradri Kothagudem": ["Allapalli", "Aswapuram", "Aswaraopeta", "Bhadrachalam", "Burgampahad", "Chandrugonda", "Cherla", "Dammapeta", "Dummugudem", "Gundala-1", "Julurpad", "Karakagudem", "Kothagudem", "Manuguru", "Mulkalapalle", "Palwancha", "Pinapaka", "Tekulapalle", "Venkatapuram", "Wazeed", "Yellandu"],
+                "Hyderabad": ["Ameerpet", "Golconda", "Khairatabad", "Secunderabad"]
             };
 
-            // Update map center and marker position
-            map.setCenter(userLocation);
-            marker.setPosition(userLocation);
-        }
-
-        function showError(error) {
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    alert("User denied the request for Geolocation.");
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    alert("Location information is unavailable.");
-                    break;
-                case error.TIMEOUT:
-                    alert("The request to get user location timed out.");
-                    break;
-                case error.UNKNOWN_ERROR:
-                    alert("An unknown error occurred.");
-                    break;
+            // Populate the subcategory dropdown based on the selected category
+            if (selectedCategory in subcategories) {
+                subcategories[selectedCategory].forEach(function(subcategory) {
+                    const option = document.createElement("option");
+                    option.value = subcategory.toLowerCase();
+                    option.text = subcategory;
+                    subcategorySelect.appendChild(option);
+                });
             }
         }
-
-        // Load the Google Maps script with your API key
-        const script = document.createElement("script");
-        script.src = "https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap";
-        script.async = true;
-        document.head.appendChild(script);
-
-        // Get location on page load
-        window.onload = getLocation;
     </script>
 </body>
 </html>
